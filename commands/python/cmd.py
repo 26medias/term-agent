@@ -18,4 +18,7 @@ print(eval('{last_line}', globals(), locals_))
     #print("result:", result)
     #print("out:", result.stdout)
     #print("err:", result.stderr, file=sys.stderr)
-    return result.stdout.decode("utf-8")
+    try:
+        return result.stdout.decode("utf-8")
+    except:
+        return result.stdout
