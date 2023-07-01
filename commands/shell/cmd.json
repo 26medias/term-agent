@@ -1,0 +1,15 @@
+[
+    {
+        "name": "execute_shell_command",
+        "description": "Execute an arbitrary shell command",
+        "parameters": {
+            "type": "object",
+            "properties": {
+                "command": {
+                    "type": "string"
+                }
+            },
+            "required": ["command"]
+        }
+    }
+]
