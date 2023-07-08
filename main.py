@@ -1,3 +1,4 @@
+import platform
 import os
 import json
 import glob
@@ -42,22 +43,47 @@ class TermAgent:
     def ask(self):
         user_input = input("> ")
         response = self.ask_gpt(self.wrap(user_input), self.functions)
-        parsed = self.parse(response)
+        parsed, can_format = self.parse(response)
         if parsed is False:
             print("Failed :(")
         else:
             if self.debug:
                 print("Answer: ", parsed)
-            if self.format:
+                print("Parse: ", can_format)
+            if self.format and can_format:
                 if self.debug:
                     print("Formatting the answer:")
                 formatted = self.format_response(user_input, parsed)
                 return formatted
         return parsed
+    
+    def sys_info(self):
+        system_info = {
+            "Operating system name": os.name,
+            "Platform system": platform.system(),
+            "Platform release": platform.release(),
+            "Machine": platform.machine(),
+            "Processor": platform.processor(),
+            "Architecture": platform.architecture(),
+            "Uname": platform.uname(),
+        }
+
+        if platform.system() == "Windows":
+            system_info["Platform specific"] = platform.win32_ver()
+        elif platform.system() == "Darwin":
+            system_info["Platform specific"] = platform.mac_ver()
+
+        # Generate formatted string
+        system_info_str = "\n".join(f"{k}: {v}" for k, v in system_info.items())
+
+        return system_info_str
 
     # Utility to wrap input for the GPT api
     def wrap(self, input):
         return [{
+            "role": "system",
+            "content": "You are an AI agent running in the terminal. System info:" + self.sys_info()
+        },{
             "role": "user",
             "content": input
         }]
@@ -87,13 +113,15 @@ class TermAgent:
                     args = {"code": fn["arguments"]}
                 else:
                     print("Function call parsing failed:", str(e))
-                    return False
+                    return False, False
             try:
-                return self.exec(name, args)
+                return self.exec(name, args), True
             except Exception as e:
                 print("Function call execution failed:", str(e))
-                return False
-            return True
+                return False, False
+        else:
+            return response["content"], False
+        return True, False
             
     # Exec the required function
     def exec(self, name="", args={}):
@@ -119,13 +147,15 @@ class TermAgent:
             "content": response
         },{
             "role": "user",
-            "content": "Please format that answer in a way a human would understand"
+            "content": "Please format that answer in a way I can understand"
         }])
         return response["content"]
 
 
     # Ask something to GPT agent and get a response, including function to execute
     def ask_gpt(self, chat_messages, functions=None):
+        if self.debug:
+            print("Sending: ", json.dumps(chat_messages, indent=4))
         try:
             if functions is None:
                 response = openai.ChatCompletion.create(
