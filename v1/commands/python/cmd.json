@@ -1,0 +1,15 @@
+[
+    {
+        "name": "python",
+        "description": "Execute arbitrary python code",
+        "parameters": {
+            "type": "object",
+            "properties": {
+                "code": {
+                    "type": "string"
+                }
+            },
+            "required": ["code"]
+        }
+    }
+]

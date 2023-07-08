@@ -1,18 +1,8 @@
 import subprocess
 import sys
-from langchain.tools import tool
 
-@tool
-def execute_python(python_code):
-    """
-    Execute arbitrary python code
-
-    Parameters:
-    - code: The code to execute
-
-    Returns:
-    - value of the last line of code
-    """
+def cmd(params={}):
+    python_code = params.get("code", "")
     lines = python_code.split('\n')
     last_line = lines[-1]
     other_lines = lines[:-1]

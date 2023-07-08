@@ -1,0 +1,16 @@
+[
+    {
+        "name": "connect_bluetooth",
+        "description": "Connect to a bluetooth device",
+        "parameters": {
+            "type": "object",
+            "properties": {
+                "device": {
+                    "type": "string",
+                    "enum": ["headphones", "speaker"]
+                }
+            },
+            "required": ["device"]
+        }
+    }
+]
